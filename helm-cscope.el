@@ -58,53 +58,9 @@
 (require 'xcscope)
 
 (defvar helm-cscope-db-directory nil)
-
-(defvar helm-c-source-cscope-c-cymbol
-  '((name . "cscope : c-cymbol")
-    (candidates-process . (lambda ()
-                            (helm-cscope-candidates "-0")))
-    (action . helm-c-source-cscope-action)
-    (candidate-number-limit . 20)
-    (type . file)
-    (delayed)))
-
-;; todo: fix action for this source. it creates empty file instead
-;; openning existing
-(defvar helm-c-source-cscope-global-definition
-  '((name . "cscope : global-definition")
-    
-    (candidates-process . (lambda ()
-                            (helm-cscope-candidates "-1")))
-    (action . helm-c-source-cscope-action)
-    (requires-pattern . 3)
-    (candidate-number-limit . 10)
-    (delayed)))
-
-(defvar helm-c-source-cscope-called-function
-  '((name . "cscope : called-function")
-    
-    (candidates-process . (lambda ()
-                            (helm-cscope-candidates "-2")))
-    (action . helm-c-source-cscope-action)
-    (requires-pattern . 3)
-    (delayed)))
-
-(defvar helm-c-source-cscope-calling-this-function
-  '((name . "cscope : calling-this-function")
-    (candidates-process . (lambda ()
-                            (helm-cscope-candidates "-3")))
-    (action . helm-c-source-cscope-action)
-    (requires-pattern . 3)
-    (delayed)))
-
-;; todo: how it should work?
-(defvar helm-c-source-cscope-text-string
-  '((name . "cscope : text-string")
-    (candidates-process . (lambda ()
-                            (helm-cscope-candidates "-4")))
-    (action . helm-c-source-cscope-action)
-    (requires-pattern . 3)
-    (delayed)))
+(defvar helm-cscope-buffer-name "*helm cscope*")
+(defvar helm-cscope-mode-name " Helm cscope")
+(defvar helm-cscope-mode-map (make-sparse-keymap))
 
 (defun helm-cscope-candidates (search-type-arg)
   (let ((cscp-dir nil)
@@ -209,43 +165,54 @@
     (find-file (concat helm-cscope-db-directory file-name))
     (goto-line line-number)))
 
+(defmacro helm-cscope--source (source-name arg)
+  `'((name . ,source-name)
+   (candidates-process . (lambda ()
+                           (helm-cscope-candidates ,arg)))
+   (action . helm-c-source-cscope-action)
+   (delayed)))
+
 ;;;###autoload
 (defun helm-cscope-select ()
   (interactive)
-  (helm :sources '(
-                   helm-c-source-cscope-c-cymbol
-                   helm-c-source-cscope-global-definition
-                   helm-c-source-cscope-called-function
-                   helm-c-source-cscope-calling-this-function
-                   )
-        :buffer "*helm cscope*"))
+  (helm :sources (list
+                  (helm-cscope--source "cscope : c-cymbol" "-0")
+                  (helm-cscope--source "cscope : global definition" "-1")
+                  (helm-cscope--source "cscope : called function" "-2")
+                  (helm-cscope--source "cscope : calling this function" "-3")
+                  )
+        :input (cscope-extract-symbol-at-cursor nil nil)
+        :buffer helm-cscope-buffer-name))
 
 ;;;###autoload
 (defun helm-cscope-find-symbol ()
   (interactive)
-  (helm :sources '(helm-c-source-cscope-c-cymbol)
-        :buffer "*helm cscope*"))
+  (helm :sources (list (helm-cscope--source "cscope : c-cymbol" "-0"))
+        :input (cscope-extract-symbol-at-cursor nil nil)
+        :buffer helm-cscope-buffer-name))
 
+;; todo: fix action for this source. it creates empty file instead
+;; openning existing
 ;;;###autoload
 (defun helm-cscope-find-global-definition ()
   (interactive)
-  (helm :sources '(helm-c-source-cscope-global-definition)
-        :buffer "*helm cscope*"))
+  (helm :sources (list (helm-cscope--source "cscope : global definition" "-1"))
+        :input (cscope-extract-symbol-at-cursor nil nil)
+        :buffer helm-cscope-buffer-name))
 
 ;;;###autoload
 (defun helm-cscope-find-called-function ()
   (interactive)
-  (helm :sources '(helm-c-source-cscope-called-function)
-        :buffer "*helm cscope*"))
+  (helm :sources (list (helm-cscope--source "cscope : called function" "-2"))
+        :input (cscope-extract-symbol-at-cursor nil nil)
+        :buffer helm-cscope-buffer-name))
 
 ;;;###autoload
 (defun helm-cscope-find-calling-this-funtcion ()
   (interactive)
-  (helm :sources '(helm-c-source-cscope-calling-this-function)
-        :buffer "*helm cscope*"))
-
-(defvar helm-cscope-mode-name " Helm cscope")
-(defvar helm-cscope-mode-map (make-sparse-keymap))
+  (helm :sources (list (helm-cscope--source "cscope : calling this function" "-3"))
+        :input (cscope-extract-symbol-at-cursor nil nil)
+        :buffer helm-cscope-buffer-name))
 
 ;;;###autoload
 (define-minor-mode helm-cscope-mode ()
