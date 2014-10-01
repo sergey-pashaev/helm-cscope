@@ -77,14 +77,14 @@
                         (or cscope-initial-directory default-directory)))
         )
       (setq default-directory cscp-dir
-            cscope-search-list (cscope-find-info cscp-dir) 
+            cscope-search-list (cscope-find-info cscp-dir)
             cscope-searched-dirs nil
             cscope-command-args (list search-type-arg (concat helm-pattern ".*"))
             cscope-first-match nil
             cscope-first-match-point nil
             cscope-stop-at-first-match-dir-meta (memq t cscope-search-list)
             )
-      
+
       (catch 'finished
         (setq options '("-L"))
         (while (and (not done) cscope-search-list)
@@ -108,7 +108,7 @@
                             cscope-directory
                             (file-name-directory cscope-directory))
                       ))
-                (setq cscope-directory 
+                (setq cscope-directory
                       (file-name-as-directory cscope-directory))
                 (if (not (member cscope-directory cscope-searched-dirs))
                     (progn
