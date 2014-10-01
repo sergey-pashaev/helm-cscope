@@ -144,7 +144,7 @@
         ;; must both be writable.
         (if (or (not (file-writable-p database-file))
                 (not (file-writable-p (file-name-directory database-file)))
-                cscope-do-not-update-database)
+                cscope-option-do-not-update-database)
             (setq options (cons "-d" options)))
 
         (setq options (cons base-database-file-name options))
