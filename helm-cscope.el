@@ -162,7 +162,9 @@
          (file-name (car lines))
          (line-number (string-to-number (car (cdr (cdr lines)))))
          )
-    (find-file (concat helm-cscope-db-directory file-name))
+    (find-file (if (file-name-absolute-p file-name)
+                   file-name
+                 (concat helm-cscope-db-directory file-name)))
     (goto-line line-number)))
 
 (defmacro helm-cscope--source (source-name arg)
